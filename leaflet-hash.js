@@ -86,7 +86,6 @@
 		},
 
 		onMapMove: function(map) {
-			console.log(arguments, this);
 			// bail if we're moving the map (updating from a hash),
 			// or if the map is not yet loaded
 
