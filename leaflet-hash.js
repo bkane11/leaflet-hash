@@ -8,7 +8,6 @@
 	google.maps.Hash = function(map) {
 		this.onHashChange = this.onHashChange.bind(this);
 		
-
 		if (map) {
 			this.init(map);
 		}
@@ -19,16 +18,24 @@
 			hash = hash.substr(1);
 		}
 		var args = hash.split("/");
-		if (args.length == 3) {
+		if (args.length) {
+		// if (args.length == 3) {
 			var zoom = parseInt(args[0], 10),
 			lat = parseFloat(args[1]),
-			lon = parseFloat(args[2]);
+			lon = parseFloat(args[2]),
+			basemap = args[3] || this.map.getMapTypeId() || 'roadmap',
+			tilt = parseInt(args[4]) || this.map.getTilt() || 0,
+			heading = parseInt(args[5]) || this.map.getHeading() || 0;
+
 			if (isNaN(zoom) || isNaN(lat) || isNaN(lon)) {
 				return false;
 			} else {
 				return {
 					center: new google.maps.LatLng(lat, lon),
-					zoom: zoom
+					zoom: zoom,
+					mapTypeId: basemap,
+					tilt: tilt,
+					heading: heading
 				};
 			}
 		} else {
@@ -39,11 +46,18 @@
 	google.maps.Hash.formatHash = function(map) {
 		var center = map.getCenter(),
 		    zoom = map.getZoom(),
+		    basemap = map.getMapTypeId(),
+		    tilt = map.getTilt(),
+		    heading = map.getHeading(),
 		    precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2));
 
 		return "#" + [zoom,
 			center.lat().toFixed(precision),
-			center.lng().toFixed(precision)
+			center.lng().toFixed(precision),
+			basemap,
+			tilt,
+			heading,
+			this.layerConfigs || ''
 		].join("/");
 	},
 
@@ -110,8 +124,25 @@
 			if (parsed) {
 				this.movingMap = true;
 
-				this.map.setCenter(parsed.center)
-				this.map.setZoom(parsed.zoom)
+				// if(parsed.center)
+				// 	this.map.setCenter(parsed.center)
+				// if(parsed.zoom)
+				// 	this.map.setZoom(parsed.zoom)
+				// if(parsed.mapTypeId)
+				// 	this.map.setMapTypeId(parsed.mapTypeId)
+				// if(parsed.tilt)
+				// 	this.map.setTilt(parsed.tilt)
+				// if(parsed.heading)
+				// 	this.map.setHeading(parsed.heading)
+				console.log(parsed); 
+
+				this.map.setOptions({
+					center: parsed.center,
+					zoom: parsed.zoom,
+					mapTypeId: parsed.mapTypeId,
+					tilt: parsed.tilt,
+					heading: parsed.heading
+				})
 				// this.map.setView(parsed.center, parsed.zoom);
 
 				this.movingMap = false;
@@ -139,7 +170,6 @@
 		hashChangeInterval: null,
 		startListening: function() {
 			this.mapMoveListener = this.addListener(this.map, "bounds_changed", this.onMapMove.bind(this), this)
-
 
 			if (HAS_HASHCHANGE) {
 				this.addListenerDom(window, "hashchange", this.onHashChange);
