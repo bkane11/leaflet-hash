@@ -134,7 +134,6 @@
 				// 	this.map.setTilt(parsed.tilt)
 				// if(parsed.heading)
 				// 	this.map.setHeading(parsed.heading)
-				console.log(parsed); 
 
 				this.map.setOptions({
 					center: parsed.center,
